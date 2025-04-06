@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loan Interest vs SIP Calculator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      padding: 20px;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+    .input-group {
+      margin: 10px 0;
+    }
+    .input-group label {
+      display: block;
+      margin-bottom: 5px;
+      color: #555;
+    }
+    .input-group input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    .input-group input:invalid {
+      border: 1px solid red;
+    }
+    .btn {
+      width: 100%;
+      padding: 10px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .btn:hover {
+      background-color: #0056b3;
+    }
+    .result {
+      margin-top: 20px;
+      background-color: #f0f8ff;
+      padding: 15px;
+      border-radius: 5px;
+      text-align: center;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>Loan Interest vs SIP Calculator</h2>
+
+  <div class="input-group">
+    <label for="loanAmount">Loan Amount:</label>
+    <input type="number" id="loanAmount" placeholder="Enter loan amount" required min="1">
+    <span id="loanAmountError" class="error"></span>
+  </div>
+
+  <div class="input-group">
+    <label for="interestRate">Interest Rate (% per annum):</label>
+    <input type="number" id="interestRate" placeholder="Enter interest rate" required min="1">
+    <span id="interestRateError" class="error"></span>
+  </div>
+
+  <div class="input-group">
+    <label for="loanTenure">Loan Tenure (in years):</label>
+    <input type="number" id="loanTenure" placeholder="Enter tenure in years" required min="1">
+    <span id="loanTenureError" class="error"></span>
+  </div>
+
+  <div class="input-group">
+    <label for="sipAmount">SIP Monthly Contribution:</label>
+    <input type="number" id="sipAmount" placeholder="Enter SIP amount" required min="1">
+    <span id="sipAmountError" class="error"></span>
+  </div>
+
+  <div class="input-group">
+    <label for="sipCagr">Expected SIP CAGR (%):</label>
+    <input type="number" id="sipCagr" placeholder="Enter expected CAGR" required min="1">
+    <span id="sipCagrError" class="error"></span>
+  </div>
+
+  <button class="btn" onclick="calculate()">Calculate</button>
+  <button class="btn" style="background-color: #f44336;" onclick="resetForm()">Reset</button>
+
+  <div id="result" class="result"></div>
+</div>
+
+<script>
+  function calculate() {
+    // Get input values
+    let loanAmount = parseFloat(document.getElementById('loanAmount').value);
+    let interestRate = parseFloat(document.getElementById('interestRate').value);
+    let loanTenure = parseFloat(document.getElementById('loanTenure').value);
+    let sipAmount = parseFloat(document.getElementById('sipAmount').value);
+    let sipCagr = parseFloat(document.getElementById('sipCagr').value);
+    let resultDiv = document.getElementById('result');
+    
+    // Clear previous errors
+    document.getElementById('loanAmountError').textContent = '';
+    document.getElementById('interestRateError').textContent = '';
+    document.getElementById('loanTenureError').textContent = '';
+    document.getElementById('sipAmountError').textContent = '';
+    document.getElementById('sipCagrError').textContent = '';
+
+    // Validate inputs
+    if (!loanAmount || loanAmount <= 0) {
+      document.getElementById('loanAmountError').textContent = 'Please enter a valid loan amount.';
+      return;
+    }
+    if (!interestRate || interestRate <= 0) {
+      document.getElementById('interestRateError').textContent = 'Please enter a valid interest rate.';
+      return;
+    }
+    if (!loanTenure || loanTenure <= 0) {
+      document.getElementById('loanTenureError').textContent = 'Please enter a valid tenure.';
+      return;
+    }
+    if (!sipAmount || sipAmount <= 0) {
+      document.getElementById('sipAmountError').textContent = 'Please enter a valid SIP amount.';
+      return;
+    }
+    if (!sipCagr || sipCagr <= 0) {
+      document.getElementById('sipCagrError').textContent = 'Please enter a valid CAGR.';
+      return;
+    }
+
+    // Calculate total interest paid
+    let totalInterest = (loanAmount * (interestRate / 100) * loanTenure).toFixed(2);
+    
+    // Calculate SIP returns using compound interest formula
+    let months = loanTenure * 12;
+    let sipReturns = (sipAmount * (((1 + (sipCagr / 100) / 12) ** months - 1) / (sipCagr / 100 / 12))).toFixed(2);
+
+    // Display results
+    resultDiv.innerHTML = `
+      <h3>Results</h3>
+      <p>Total Interest Paid: <strong>₹${totalInterest}</strong></p>
+      <p>Total SIP Returns: <strong>₹${sipReturns}</strong></p>
+      ${parseFloat(sipReturns) > parseFloat(totalInterest) 
+        ? "<p>Your SIP can cover your loan interest.</p>" 
+        : "<p>Your SIP will not cover your loan interest.</p>"}
+    `;
+  }
+
+  function resetForm() {
+    document.getElementById('loanAmount').value = '';
+    document.getElementById('interestRate').value = '';
+    document.getElementById('loanTenure').value = '';
+    document.getElementById('sipAmount').value = '';
+    document.getElementById('sipCagr').value = '';
+    document.getElementById('result').innerHTML = '';
+    
+    // Clear error messages
+    document.getElementById('loanAmountError').textContent = '';
+    document.getElementById('interestRateError').textContent = '';
+    document.getElementById('loanTenureError').textContent = '';
+    document.getElementById('sipAmountError').textContent = '';
+    document.getElementById('sipCagrError').textContent = '';
+  }
+</script>
+
+</body>
+</html>
